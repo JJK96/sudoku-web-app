@@ -1,5 +1,5 @@
 function cellHasPencilledDigit(cell, d, simplePencilMarking) {
-    return cell.get('innerPencils').includes(d) || (!simplePencilMarking && cell.get('outerPencils').includes(d));
+    return cell.get('innerPencils').has(d) || (!simplePencilMarking && cell.get('outerPencils').has(d));
 }
 
 export default function SudokuCellBackground({cell, dim, cellSize, matchDigit, showPencilmarks, simplePencilMarking}) {

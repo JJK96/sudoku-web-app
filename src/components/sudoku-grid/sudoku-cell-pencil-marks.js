@@ -54,20 +54,19 @@ function SudokuCellSimplePencilMarks({cell, dim, cellSize, offsets, matchDigit})
     }
     const fontSize = 26 * cellSize / 100;
     const marks = allDigits
-        .filter(d => pm.includes(d))
+        .filter(d => pm.has(d))
         .map((d) => {
             const bgClasses = []
             if (matchDigit !== '0') {
-                console.log("m", matchDigit, typeof(matchDigit))
-                console.log("d", d, typeof(d))
                 if (d === matchDigit) {
-                    console.log(d, matchDigit)
                     bgClasses.push('matched')
                 }
             }
             const offset = offsets[d];
             return (
-                <g className={bgClasses.join(' ')} >
+                <g className={bgClasses.join(' ')} 
+                   key={d}
+                >
                     <rect
                         className="pencil-mark-select-match-overlay"
                         x={dim.x + offset.x - bgsize/2}
@@ -76,7 +75,6 @@ function SudokuCellSimplePencilMarks({cell, dim, cellSize, offsets, matchDigit})
                         height={bgsize}
                     />
                     <text
-                        key={d}
                         x={dim.x + offset.x}
                         y={dim.y + offset.y}
                         fontSize={fontSize}

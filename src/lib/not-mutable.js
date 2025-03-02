@@ -179,6 +179,11 @@ class NMMap {
         return m[k];
     }
 
+    has(k) {
+        const m = this[_nm_map];
+        return m.hasOwnProperty(k)
+    }
+
     set(k, v) {
         const old = this[_nm_map];
         const m = { ...old, [k]: v };

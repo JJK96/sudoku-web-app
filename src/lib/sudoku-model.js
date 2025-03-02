@@ -84,8 +84,8 @@ function newCell(index, digit) {
         isGiven: digit !== '0',
         // Properties that might change and get serialised for undo/redo
         digit,
-        outerPencils: emptySet,
-        innerPencils: emptySet,
+        outerPencils: Map(),
+        innerPencils: Map(),
         colorCode: '1',
         // Cache for serialised version of above properties
         snapshot: '',
@@ -93,6 +93,13 @@ function newCell(index, digit) {
         isSelected: false,
         errorMessage: undefined,
     });
+}
+
+function newPencilMark(digit, color=null) {
+    return Map({
+        digit,
+        color
+    })
 }
 
 export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateChange, entryPoint, skipCheck}) {
@@ -503,7 +510,8 @@ export const modelHelpers = {
         const explainer = grid.get("explainer");
         const currDigits = grid.get('cells').map(c => c.get('digit')).toArray();
         const currCandidates = grid.get("cells").map(c => {
-            return c.get("innerPencils").union(c.get("outerPencils")).toArray().join('');
+            const mergedPencils = c.get("innerPencils").merge(c.get("outerPencils")) 
+            return Object.keys(mergedPencils.toObject()).join('');
         }).toArray();
         return explainer.findNextStep(currDigits, currCandidates);
     },
@@ -764,8 +772,8 @@ export const modelHelpers = {
             cs = cs + 'D' + digit;
         }
         else {
-            const inner = c.get('innerPencils').toArray().sort().join('');
-            const outer = c.get('outerPencils').toArray().sort().join('');
+            const inner = Object.keys(c.get('innerPencils').toObject()).sort().join('');
+            const outer = Object.keys(c.get('outerPencils').toObject()).sort().join('');
             cs = cs +
                 (outer === '' ? '' : ('T' + outer)) +
                 (inner === '' ? '' : ('N' + inner));
@@ -791,8 +799,8 @@ export const modelHelpers = {
         snapshot.split(',').forEach(csn => {
             const props = {
                 digit: '0',
-                innerPencils: [],
-                outerPencils: [],
+                innerPencils: Map(),
+                outerPencils: Map(),
                 colorCode: '1',
                 snapshot: '',
             };
@@ -814,10 +822,10 @@ export const modelHelpers = {
                 }
                 else if ('0' <= char && char <= '9') {
                     if (state === 'T') {
-                        props.outerPencils.push(csn[i]);
+                        props.outerPencils.set(csn[i], newPencilMark(csn[i]));
                     }
                     else if (state === 'N') {
-                        props.innerPencils.push(csn[i]);
+                        props.innerPencils.set(csn[i], newPencilMark(csn[i]));
                     }
                 }
                 // else ignore any other character
@@ -832,8 +840,8 @@ export const modelHelpers = {
         const empty = {
             digit: '0',
             colorCode: '1',
-            outerPencils: [],
-            innerPencils: [],
+            outerPencils: Map(),
+            innerPencils: Map(),
             snapshot: '',
         };
         const newCells = grid.get('cells').map(c => {
@@ -851,8 +859,8 @@ export const modelHelpers = {
                 c = c.merge({
                     digit: props.digit,
                     colorCode: props.colorCode,
-                    outerPencils: Set(props.outerPencils),
-                    innerPencils: Set(props.innerPencils),
+                    outerPencils: Map(props.outerPencils),
+                    innerPencils: Map(props.innerPencils),
                     snapshot: props.snapshot,
                 });
             }
@@ -1311,10 +1319,10 @@ export const modelHelpers = {
                     let outerPencils = c.get('outerPencils');
                     Object.keys(ce).forEach(d => {
                         matchDigit = d;
-                        if (innerPencils.includes(d)) {
+                        if (innerPencils.has(d)) {
                             innerPencils = innerPencils.delete(d);
                         }
-                        if (outerPencils.includes(d)) {
+                        if (outerPencils.has(d)) {
                             outerPencils = outerPencils.delete(d);
                         }
                     });
@@ -1465,7 +1473,7 @@ export const modelHelpers = {
             const setMode = modelHelpers.selectionHasMatch(grid, c => {
                 return c.get('digit') !== '0'
                         ? false  // ignore full digits in selection
-                        : !c.get(setName).includes(digit);
+                        : !c.get(setName).has(digit);
             });
             args = [digit, setMode];
         }
@@ -1521,8 +1529,8 @@ export const modelHelpers = {
         }
         return c.merge({
             'digit': newDigit,
-            'outerPencils': emptySet,
-            'innerPencils': emptySet,
+            'outerPencils': Map(),
+            'innerPencils': Map(),
             'errorMessage': undefined,
         });
     },
@@ -1532,43 +1540,40 @@ export const modelHelpers = {
         ? c.set('colorCode', '1')
         : c.merge({
             digit: '0',
-            outerPencils: emptySet,
-            innerPencils: emptySet,
+            outerPencils: Map(),
+            innerPencils: Map(),
             colorCode: '1',
             errorMessage: undefined,
         });
     },
 
-    toggleInnerPencilMarkAsCellOp: (c, digit, setMode) => {
+    togglePencilMarkAsCellOp: (c, digit, setMode, type) => {
         if (c.get('digit') !== '0' || digit === '0') {
             return c;
         }
-        let pencilMarks = c.get('innerPencils');
-        pencilMarks = setMode
-            ? pencilMarks.add(digit)
-            : pencilMarks.delete(digit);
-        return c.set('innerPencils', pencilMarks);
+        let oldpencilMarks = c.get(type);
+        let pencilMarks = setMode
+            ? oldpencilMarks.set(digit, newPencilMark(digit))
+            : oldpencilMarks.delete(digit);
+        return c.set(type, pencilMarks);
+    },
+
+    toggleInnerPencilMarkAsCellOp: (c, digit, setMode, type) => {
+        return modelHelpers.togglePencilMarkAsCellOp(c, digit, setMode, 'innerPencils')
     },
 
     toggleOuterPencilMarkAsCellOp: (c, digit, setMode) => {
-        if (c.get('digit') !== '0' || digit === '0') {
-            return c;
-        }
-        let pencilMarks = c.get('outerPencils');
-        pencilMarks = setMode
-            ? pencilMarks.add(digit)
-            : pencilMarks.delete(digit);
-        return c.set('outerPencils', pencilMarks);
+        return modelHelpers.togglePencilMarkAsCellOp(c, digit, setMode, 'outerPencils')
     },
 
     pencilMarksToInnerAsCellOp: (c) => {
         if (c.get('digit') !== '0') {
             return c;
         }
-        let newInner = c.get('innerPencils').union(c.get('outerPencils'));
+        let newInner = c.get('innerPencils').merge(c.get('outerPencils'));
         return c.merge({
             'innerPencils': newInner,
-            'outerPencils': emptySet,
+            'outerPencils': Map(),
         });
     },
 
@@ -1592,7 +1597,7 @@ export const modelHelpers = {
             if (c.get('digit') === '0' && isEliminated[i]) {
                 const inner = c.get('innerPencils');
                 const outer = c.get('outerPencils');
-                if (inner.includes(newDigit) || outer.includes(newDigit)) {
+                if (inner.has(newDigit) || outer.has(newDigit)) {
                     return modelHelpers.updateCellSnapshotCache(
                         c.merge({
                             innerPencils: inner.delete(newDigit),
@@ -1660,10 +1665,13 @@ export const modelHelpers = {
         const candidates = hinter.calculateCellCandidates();
         const cells = grid.get('cells').map((c, i) => {
             const cellCandidates = candidates[i];
-            return cellCandidates === null
-                ? c
-                : modelHelpers.updateCellSnapshotCache(c.merge({
-                      innerPencils: Set(cellCandidates),
+            if (cellCandidates === null) return c
+            const innerPencils = Map()
+            cellCandidates.forEach(c => {
+                innerPencils.set(c, newPencilMark(c))
+            })
+            return modelHelpers.updateCellSnapshotCache(c.merge({
+                      innerPencils: innerPencils,
                       outerPencils: emptySet,
                   }));
         });
