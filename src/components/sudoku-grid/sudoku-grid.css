@@ -35,6 +35,10 @@ path.selection-outline {
     fill: transparent;
 }
 
+.pencil-mark-select-match-overlay {
+    fill: transparent;
+}
+
 .cell-bg .color-code-1 { fill: var(--cell-bg-1-fill-color); }
 .cell-bg .color-code-2 { fill: var(--cell-bg-2-fill-color); }
 .cell-bg .color-code-3 { fill: var(--cell-bg-3-fill-color); }
@@ -50,6 +54,10 @@ path.selection-outline {
 }
 
 .matched .cell-select-match-overlay {
+    fill: var(--matched-fill-color);
+}
+
+.matched .pencil-mark-select-match-overlay {
     fill: var(--matched-fill-color);
 }
 

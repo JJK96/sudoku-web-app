@@ -17,7 +17,8 @@ export default function SudokuCellBackground({cell, dim, cellSize, matchDigit, s
     const digit = cell.get('digit')
     if (matchDigit !== '0') {
         if (digit === matchDigit || (showPencilmarks && cellHasPencilledDigit(cell, matchDigit, simplePencilMarking))) {
-            bgClasses.push('matched');
+            //bgClasses.push('matched');
+            //TODO clean up nicely
         }
     }
     return (

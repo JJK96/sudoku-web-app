@@ -43,7 +43,7 @@ function layerSelectionOutline({cells, dim}) {
     );
 }
 
-function layerCellPencilMarks ({simplePencilMarking, cells, cellSize, dim}) {
+function layerCellPencilMarks ({simplePencilMarking, cells, cellSize, dim, matchDigit}) {
     const pencilOffsets = simplePencilMarking ? dim.simplePencilOffsets : dim.outerPencilOffsets;
     return cells.map((cell, i) => {
         const cellDim = dim.cell[i];
@@ -53,14 +53,15 @@ function layerCellPencilMarks ({simplePencilMarking, cells, cellSize, dim}) {
             dim={cellDim}
             cellSize={cellSize}
             pencilOffsets={pencilOffsets}
+            matchDigit={matchDigit}
         />;
     });
 }
 
-function layerCellDigits ({cells, dim}) {
+function layerCellDigits ({cells, dim, matchDigit}) {
     return cells.map((cell, i) => {
         const cellDim = dim.cell[i];
-        return <SudokuCellDigit key={`dig${i}`} cell={cell} dim={cellDim} fontSize={dim.fontSize} />;
+        return <SudokuCellDigit key={`dig${i}`} cell={cell} dim={cellDim} fontSize={dim.fontSize} matchDigit={matchDigit}/>;
     });
 }
 
@@ -89,8 +90,8 @@ function cellContentLayers({cells, cellSize, dim, matchDigit, showPencilmarks, s
     const selectionOutline = outlineSelection
         ? layerSelectionOutline({cells, dim})
         : null;
-    const pencilMarks = showPencilmarks ? layerCellPencilMarks({simplePencilMarking, cells, cellSize, dim}) : [];
-    const digits      = layerCellDigits({cells, cellSize, dim});
+    const pencilMarks = showPencilmarks ? layerCellPencilMarks({simplePencilMarking, cells, cellSize, dim, matchDigit}) : [];
+    const digits      = layerCellDigits({cells, cellSize, dim, matchDigit});
     return <>
         {backgrounds}
         {selectionOutline}
