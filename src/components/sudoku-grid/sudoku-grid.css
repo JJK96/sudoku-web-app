@@ -49,6 +49,16 @@ path.selection-outline {
 .cell-bg .color-code-8 { fill: var(--cell-bg-8-fill-color); }
 .cell-bg .color-code-9 { fill: var(--cell-bg-9-fill-color); }
 
+.pencil-mark-bg .color-code-1 { fill: var(--cell-bg-1-fill-color); }
+.pencil-mark-bg .color-code-2 { fill: var(--cell-bg-2-fill-color); }
+.pencil-mark-bg .color-code-3 { fill: var(--cell-bg-3-fill-color); }
+.pencil-mark-bg .color-code-4 { fill: var(--cell-bg-4-fill-color); }
+.pencil-mark-bg .color-code-5 { fill: var(--cell-bg-5-fill-color); }
+.pencil-mark-bg .color-code-6 { fill: var(--cell-bg-6-fill-color); }
+.pencil-mark-bg .color-code-7 { fill: var(--cell-bg-7-fill-color); }
+.pencil-mark-bg .color-code-8 { fill: var(--cell-bg-8-fill-color); }
+.pencil-mark-bg .color-code-9 { fill: var(--cell-bg-9-fill-color); }
+
 .selection-style-solid .selected .cell-select-match-overlay {
     fill: var(--selected-fill-color);
 }

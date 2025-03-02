@@ -95,7 +95,7 @@ function newCell(index, digit) {
     });
 }
 
-function newPencilMark(digit, color=null) {
+function newPencilMark(digit, color='1') {
     return Map({
         digit,
         color
@@ -1553,7 +1553,7 @@ export const modelHelpers = {
         }
         let oldpencilMarks = c.get(type);
         let pencilMarks = setMode
-            ? oldpencilMarks.set(digit, newPencilMark(digit))
+            ? oldpencilMarks.set(digit, newPencilMark(digit, '4')) //TODO change from hardcoded to something set by virtual keyboard
             : oldpencilMarks.delete(digit);
         return c.set(type, pencilMarks);
     },

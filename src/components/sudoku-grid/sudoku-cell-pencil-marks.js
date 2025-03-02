@@ -56,7 +56,8 @@ function SudokuCellSimplePencilMarks({cell, dim, cellSize, offsets, matchDigit})
     const marks = allDigits
         .filter(d => pm.has(d))
         .map((d) => {
-            const bgClasses = []
+            const bgClasses = ['pencil-mark-bg']
+            const bgColorCode = pm.get(d).get("color")
             if (matchDigit !== '0') {
                 if (d === matchDigit) {
                     bgClasses.push('matched')
@@ -67,6 +68,13 @@ function SudokuCellSimplePencilMarks({cell, dim, cellSize, offsets, matchDigit})
                 <g className={bgClasses.join(' ')} 
                    key={d}
                 >
+                    <rect
+                        className={`color-code-${bgColorCode}`}
+                        x={dim.x + offset.x - bgsize/2}
+                        y={dim.y + offset.y - bgsize}
+                        width={bgsize}
+                        height={bgsize}
+                    />
                     <rect
                         className="pencil-mark-select-match-overlay"
                         x={dim.x + offset.x - bgsize/2}
