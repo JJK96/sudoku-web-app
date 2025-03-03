@@ -1,9 +1,5 @@
-function cellHasPencilledDigit(cell, d, simplePencilMarking) {
-    return cell.get('innerPencils').has(d) || (!simplePencilMarking && cell.get('outerPencils').has(d));
-}
-
 export default function SudokuCellBackground({cell, dim, cellSize, matchDigit, showPencilmarks, simplePencilMarking}) {
-    const bgColorCode = showPencilmarks ? cell.get('colorCode') : '1';
+    const bgColorCode = cell.get('colorCode');
     const bgClasses = [ 'cell-bg' ];
     if (cell.get('isGiven')) {
         bgClasses.push('given');
@@ -16,9 +12,8 @@ export default function SudokuCellBackground({cell, dim, cellSize, matchDigit, s
     }
     const digit = cell.get('digit')
     if (matchDigit !== '0') {
-        if (digit === matchDigit || (showPencilmarks && cellHasPencilledDigit(cell, matchDigit, simplePencilMarking))) {
-            //bgClasses.push('matched');
-            //TODO clean up nicely
+        if (digit === matchDigit) {
+            bgClasses.push('matched');
         }
     }
     return (
