@@ -1467,16 +1467,6 @@ export const modelHelpers = {
         if (opName === 'toggleOuterPencilMark' && isSimpleMode) {
             opName = 'toggleInnerPencilMark'
         }
-        if (opName === 'toggleInnerPencilMark' || opName === 'toggleOuterPencilMark') {
-            const [digit] = args;
-            const setName = opName === 'toggleInnerPencilMark' ? 'innerPencils' : 'outerPencils'
-            const setMode = modelHelpers.selectionHasMatch(grid, c => {
-                return c.get('digit') !== '0'
-                        ? false  // ignore full digits in selection
-                        : !c.get(setName).has(digit);
-            });
-            args = [digit, setMode];
-        }
         const mode = grid.get('mode');
         const op = modelHelpers[opName + 'AsCellOp'];
         if (!op) {
@@ -1547,23 +1537,31 @@ export const modelHelpers = {
         });
     },
 
-    togglePencilMarkAsCellOp: (c, digit, setMode, type) => {
+    togglePencilMarkAsCellOp: (c, digit, type) => {
         if (c.get('digit') !== '0' || digit === '0') {
             return c;
         }
-        let oldpencilMarks = c.get(type);
-        let pencilMarks = setMode
-            ? oldpencilMarks.set(digit, newPencilMark(digit, '4')) //TODO change from hardcoded to something set by virtual keyboard
-            : oldpencilMarks.delete(digit);
+        const color = '1' //TODO change from hardcoded to something set by virtual keyboard
+        let pencilMarks = c.get(type);
+        let pencilMark = pencilMarks.get(digit)
+        if (pencilMark === undefined) {
+            pencilMarks = pencilMarks.set(digit, newPencilMark(digit, color))
+        } else if (pencilMark.get('color') !== color) {
+            // Update the color of the digit
+            pencilMark = pencilMark.set('color', color)
+            pencilMarks = pencilMarks.set(digit, pencilMark)
+        } else {
+            pencilMarks = pencilMarks.delete(digit)
+        }
         return c.set(type, pencilMarks);
     },
 
-    toggleInnerPencilMarkAsCellOp: (c, digit, setMode, type) => {
-        return modelHelpers.togglePencilMarkAsCellOp(c, digit, setMode, 'innerPencils')
+    toggleInnerPencilMarkAsCellOp: (c, digit, type) => {
+        return modelHelpers.togglePencilMarkAsCellOp(c, digit, 'innerPencils')
     },
 
-    toggleOuterPencilMarkAsCellOp: (c, digit, setMode) => {
-        return modelHelpers.togglePencilMarkAsCellOp(c, digit, setMode, 'outerPencils')
+    toggleOuterPencilMarkAsCellOp: (c, digit) => {
+        return modelHelpers.togglePencilMarkAsCellOp(c, digit, 'outerPencils')
     },
 
     pencilMarksToInnerAsCellOp: (c) => {
