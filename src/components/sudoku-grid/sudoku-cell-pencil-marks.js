@@ -1,6 +1,6 @@
 const allDigits = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-function SudokuCellOuterPencilMarks({cell, dim, cellSize, offsets}) {
+function SudokuCellOuterPencilMarks({cell, dim, cellSize, offsets, matchDigit}) {
     const pm = cell.get('outerPencils');
     if (cell.get('digit') !== '0' || pm.size === 0) {
         return null;
@@ -8,47 +8,104 @@ function SudokuCellOuterPencilMarks({cell, dim, cellSize, offsets}) {
     const fontSize = 26 * cellSize / 100;
     let i = 0;
     const marks = allDigits
-        .filter(d => pm.includes(d))
+        .filter(d => pm.has(d))
         .map((d) => {
+            const bgClasses = ['pencil-mark-bg']
+            const bgColorCode = pm.get(d).get("color")
+            if (matchDigit !== '0') {
+                if (d === matchDigit) {
+                    bgClasses.push('matched')
+                }
+            }
             const offset = offsets[i++];
             return (
-                <text
-                    key={offset.key}
-                    x={dim.x + offset.x}
-                    y={dim.y + offset.y}
-                    fontSize={fontSize}
-                    textAnchor="middle"
+                <g className={bgClasses.join(' ')} 
+                   key={d}
                 >
-                    {d}
-                </text>
+                    <rect
+                        className={`color-code-${bgColorCode}`}
+                        x={dim.x + offset.x - fontSize/2}
+                        y={dim.y + offset.y - fontSize}
+                        width={fontSize}
+                        height={fontSize}
+                    />
+                    <rect
+                        className="pencil-mark-select-match-overlay"
+                        x={dim.x + offset.x - fontSize/2}
+                        y={dim.y + offset.y - fontSize}
+                        width={fontSize}
+                        height={fontSize}
+                    />
+                    <text
+                        key={offset.key}
+                        x={dim.x + offset.x}
+                        y={dim.y + offset.y}
+                        fontSize={fontSize}
+                        textAnchor="middle"
+                    >
+                        {d}
+                    </text>
+                </g>
             );
         });
     return <g className="outer-pencil">{marks}</g>;
 }
 
-function SudokuCellInnerPencilMarks({cell, dim, cellSize}) {
+function SudokuCellInnerPencilMarks({cell, dim, cellSize, matchDigit}) {
     const pm = cell.get('innerPencils');
     if (cell.get('digit') !== '0' || pm.size === 0) {
         return null;
     }
     const fontSize = 26 * cellSize / 100;
-    const digits = allDigits.filter(d => pm.includes(d)).join('');
-    return (
-        <text
-            className="inner-pencil"
-            x={dim.x + 49 * cellSize / 100}
-            y={dim.y + 61 * cellSize / 100}
-            fontSize={fontSize}
-            textAnchor="middle"
-        >
-            {digits}
-        </text>
-    );
+    const digitWidth = 0.56 * fontSize
+    const digits = allDigits.filter(d => pm.has(d))
+    const width = digits.length * digitWidth
+    let x_offset = (49 * cellSize / 100) - width/2
+    let y_offset = (61 * cellSize / 100)
+    const marks = digits
+        .map((d) => {
+            const bgClasses = ['pencil-mark-bg']
+            const bgColorCode = pm.get(d).get("color")
+            if (matchDigit !== '0') {
+                if (d === matchDigit) {
+                    bgClasses.push('matched')
+                }
+            }
+            const ret = (
+                <g className={bgClasses.join(' ')} 
+                   key={d}
+                >
+                    <rect
+                        className={`color-code-${bgColorCode}`}
+                        x={dim.x + x_offset}
+                        y={dim.y + y_offset - fontSize}
+                        width={digitWidth}
+                        height={fontSize}
+                    />
+                    <rect
+                        className="pencil-mark-select-match-overlay"
+                        x={dim.x + x_offset}
+                        y={dim.y + y_offset - fontSize}
+                        width={digitWidth}
+                        height={fontSize}
+                    />
+                    <text className="inner-pencil"
+                        x={dim.x + x_offset}
+                        y={dim.y + y_offset}
+                        fontSize={fontSize}
+                    >
+                        {d}
+                    </text>
+                </g>
+            );
+            x_offset += digitWidth
+            return ret;
+        });
+    return <g className="inner-pencil">{marks}</g>;
 }
 
 function SudokuCellSimplePencilMarks({cell, dim, cellSize, offsets, matchDigit}) {
     const pm = cell.get('innerPencils');
-    const bgsize = 30
     if (cell.get('digit') !== '0' || pm.size === 0) {
         return null;
     }
@@ -70,17 +127,17 @@ function SudokuCellSimplePencilMarks({cell, dim, cellSize, offsets, matchDigit})
                 >
                     <rect
                         className={`color-code-${bgColorCode}`}
-                        x={dim.x + offset.x - bgsize/2}
-                        y={dim.y + offset.y - bgsize}
-                        width={bgsize}
-                        height={bgsize}
+                        x={dim.x + offset.x - fontSize/2}
+                        y={dim.y + offset.y - fontSize}
+                        width={fontSize}
+                        height={fontSize}
                     />
                     <rect
                         className="pencil-mark-select-match-overlay"
-                        x={dim.x + offset.x - bgsize/2}
-                        y={dim.y + offset.y - bgsize}
-                        width={bgsize}
-                        height={bgsize}
+                        x={dim.x + offset.x - fontSize/2}
+                        y={dim.y + offset.y - fontSize}
+                        width={fontSize}
+                        height={fontSize}
                     />
                     <text
                         x={dim.x + offset.x}
