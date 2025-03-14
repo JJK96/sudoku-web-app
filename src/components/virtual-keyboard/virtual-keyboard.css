@@ -26,6 +26,11 @@
 .vkbd-button-swatch.color-code-8 { fill: var(--cell-bg-8-fill-color); }
 .vkbd-button-swatch.color-code-9 { fill: var(--cell-bg-9-fill-color); }
 
+.vkbd-button-swatch.active {
+    stroke-width: 5px;
+    stroke:black;
+}
+
 .vkbd-mode-panel .background {
     fill: var(--vkbd-mode-panel-fill-color);
 }

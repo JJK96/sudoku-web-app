@@ -359,13 +359,17 @@ function vkbdKeyPressHandler(e, setGrid, inputMode) {
         setGrid((grid) => {
             const selectedCellCount = grid.get("cells").count((c) => c.get("isSelected"));
             if (e.ctrlKey || e.metaKey || inputMode === 'inner') {
-                return modelHelpers.updateSelectedCells(grid, 'toggleInnerPencilMark', keyValue);
+                return modelHelpers.updateSelectedCells(grid, 'toggleInnerPencilMark', keyValue, grid.get('activeColor'));
             }
             else if (inputMode === 'color') {
-                return modelHelpers.updateSelectedCells(grid, 'setCellColor', keyValue);
+                if (e.source.includes("hold")) {
+                    return modelHelpers.setActiveColor(grid, keyValue);
+                } else {
+                    return modelHelpers.updateSelectedCells(grid, 'setCellColor', keyValue);
+                }
             }
             else if (e.shiftKey || inputMode === 'outer' || selectedCellCount > 1) {
-                return modelHelpers.updateSelectedCells(grid, 'toggleOuterPencilMark', keyValue);
+                return modelHelpers.updateSelectedCells(grid, 'toggleOuterPencilMark', keyValue, grid.get('activeColor'));
             }
             else {
                 return modelHelpers.updateSelectedCells(grid, 'setDigit', keyValue);
@@ -621,6 +625,7 @@ function App() {
                                     completedDigits={completedDigits}
                                     inputHandler={inputHandler}
                                     simplePencilMarking={settings[SETTINGS.simplePencilMarking]}
+                                    activeColor={grid.get('activeColor')}
                                 />
                                 {startButton}
                             </>

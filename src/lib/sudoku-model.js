@@ -137,6 +137,7 @@ export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateCha
         matchDigit: '0',
         modalState: undefined,
         hintsUsed: emptySet,
+        activeColor: '0'
     });
     return initialError
         ? modelHelpers.setInitialDigits(grid, initialDigits, initialError, entryPoint)
@@ -1459,6 +1460,14 @@ export const modelHelpers = {
         return !!(selection.find(testFunc));
     },
 
+    setActiveColor: (grid, keyValue) => {
+        if (grid.get('activeColor') === keyValue) {
+            return grid.set('activeColor', '0')
+        } else {
+            return grid.set('activeColor', keyValue)
+        }
+    },
+
     updateSelectedCells: (grid, opName, ...args) => {
         if (actionsBlocked(grid)) {
             return grid;
@@ -1537,11 +1546,10 @@ export const modelHelpers = {
         });
     },
 
-    togglePencilMarkAsCellOp: (c, digit, type) => {
+    togglePencilMarkAsCellOp: (c, digit, type, color) => {
         if (c.get('digit') !== '0' || digit === '0') {
             return c;
         }
-        const color = '1' //TODO change from hardcoded to something set by virtual keyboard
         let pencilMarks = c.get(type);
         let pencilMark = pencilMarks.get(digit)
         if (pencilMark === undefined) {
@@ -1556,12 +1564,12 @@ export const modelHelpers = {
         return c.set(type, pencilMarks);
     },
 
-    toggleInnerPencilMarkAsCellOp: (c, digit, type) => {
-        return modelHelpers.togglePencilMarkAsCellOp(c, digit, 'innerPencils')
+    toggleInnerPencilMarkAsCellOp: (c, digit, color) => {
+        return modelHelpers.togglePencilMarkAsCellOp(c, digit, 'innerPencils', color)
     },
 
-    toggleOuterPencilMarkAsCellOp: (c, digit) => {
-        return modelHelpers.togglePencilMarkAsCellOp(c, digit, 'outerPencils')
+    toggleOuterPencilMarkAsCellOp: (c, digit, color) => {
+        return modelHelpers.togglePencilMarkAsCellOp(c, digit, 'outerPencils', color)
     },
 
     pencilMarksToInnerAsCellOp: (c) => {
