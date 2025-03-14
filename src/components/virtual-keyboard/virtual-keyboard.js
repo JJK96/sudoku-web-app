@@ -8,6 +8,7 @@ import "./virtual-keyboard.css";
 
 
 let seenTouchEvent = false;
+let lastTouchState = null;
 
 // For button hold handler
 let mouseDownTime = 0;
@@ -25,9 +26,10 @@ function keyValueFromTouchEvent (e) {
 
 function buttonHoldHandler (e, inputHandler, touchState = null) {
     if (touchState !== null) {
-        const [keyValue, wantDoubleClick] = keyValueFromTouchEvent(e);
+        const [keyValue] = keyValueFromTouchEvent(e);
         if (keyValue !== undefined) {
-            inputHandler({type: 'vkbdKeyPress', wantDoubleClick, keyValue, value: keyValue, source: 'touchhold'})
+            touchState.current.source += 'hold'
+            inputHandler(touchState.current)
         }
     } else {
         const {keyValue, wantDoubleClick} = e.target.dataset;
@@ -51,17 +53,18 @@ function buttonTouchHandler (e, touchState, inputHandler) {
     if (eventType === 'touchstart') {
         const [keyValue, wantDoubleClick] = keyValueFromTouchEvent(e);
         if (keyValue !== undefined) {
-            touchState.current = {type: 'vkbdKeyPress', wantDoubleClick, keyValue, value: keyValue, source: 'touch'};
+            lastTouchState.current = {type: 'vkbdKeyPress', wantDoubleClick, keyValue, value: keyValue, source: 'touch'};
         }
         mouseDownTime = Date.now()
     }
     else if (eventType === 'touchend') {
         if (Date.now() - mouseDownTime > holdTime) {
-            buttonHoldHandler(e, inputHandler, touchState)
+            buttonHoldHandler(e, inputHandler, lastTouchState)
         } else {
-            inputHandler(touchState.current);
+            inputHandler(lastTouchState.current);
         }
         touchState.current = null;
+        lastTouchState = null;
     }
 }
 
